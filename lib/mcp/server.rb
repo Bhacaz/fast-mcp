@@ -39,6 +39,7 @@ module FastMcp
       @capabilities = DEFAULT_CAPABILITIES.dup
       @tool_filters = []
       @resource_filters = []
+      @on_error_result = nil
 
       # Merge with provided capabilities
       @capabilities.merge!(capabilities) if capabilities.is_a?(Hash)
@@ -80,6 +81,10 @@ module FastMcp
       resource
     end
 
+    def on_error_result(&block)
+      @on_error_result = block
+    end
+
     # Remove a resource from the server
     def remove_resource(uri)
       resource = @resources.find { |r| r.uri == uri }
@@ -112,27 +117,14 @@ module FastMcp
 
     # Start the server as a Rack middleware
     def start_rack(app, options = {})
-      @logger.info("Starting MCP server as Rack middleware: #{@name} v#{@version}")
+      @transport_klass = options.delete(:transport) || FastMcp::Transports::RackTransport
+      transport_name = @transport_klass.name.split('::').last
+
+      @logger.info("Starting MCP server with #{transport_name}: #{@name} v#{@version}")
       @logger.info("Available tools: #{@tools.keys.join(', ')}")
       @logger.info("Available resources: #{@resources.map(&:resource_name).join(', ')}")
 
-      # Use Rack transport
-      transport_klass = FastMcp::Transports::RackTransport
-      @transport = transport_klass.new(app, self, options.merge(logger: @logger))
-      @transport.start
-
-      # Return the transport as middleware
-      @transport
-    end
-
-    def start_authenticated_rack(app, options = {})
-      @logger.info("Starting MCP server as Authenticated Rack middleware: #{@name} v#{@version}")
-      @logger.info("Available tools: #{@tools.keys.join(', ')}")
-      @logger.info("Available resources: #{@resources.map(&:resource_name).join(', ')}")
-
-      # Use Rack transport
-      transport_klass = FastMcp::Transports::AuthenticatedRackTransport
-      @transport = transport_klass.new(app, self, options.merge(logger: @logger))
+      @transport = @transport_klass.new(app, self, options.merge(logger: @logger))
       @transport.start
 
       # Return the transport as middleware
@@ -366,6 +358,8 @@ module FastMcp
 
     # Format and send error result
     def send_error_result(message, id)
+      @on_error_result&.call(message)
+
       # Format error according to the MCP specification
       error_result = {
         content: [{ type: 'text', text: "Error: #{message}" }],

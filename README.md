@@ -13,7 +13,7 @@
   <a href="https://discord.gg/9HHfAtY3HF"><img src = "https://dcbadge.limes.pink/api/server/https://discord.gg/9HHfAtY3HF?style=flat" alt="Discord invite link" /></a>
 </p>
 
-## 🌟 Interface your Servers with LLMs in minutes !
+## 🌟 Interface your Servers with LLMs in minutes
 
 AI models are powerful, but they need to interact with your applications to be truly useful. Traditional approaches mean wrestling with:
 
@@ -44,8 +44,8 @@ Fast MCP solves all these problems by providing a clean, Ruby-focused implementa
 - 🏷️ **Scope-based Authorization** - Fine-grained access control for MCP operations
 - 📊 **JWT + Opaque Tokens** - Support for both token types with JWKS validation
 
-
 ## 💎 What Makes FastMCP Great
+
 ```ruby
 # Define tools for AI models to use
 server = FastMcp::Server.new(name: 'popular-users', version: '1.0.0')
@@ -59,10 +59,10 @@ class CreateUserTool < FastMcp::Tool
   arguments do
     required(:first_name).filled(:string).description("First name of the user")
     optional(:age).filled(:integer).description("Age of the user")
-    required(:address).hash do
-      optional(:street).filled(:string)
-      optional(:city).filled(:string)
-      optional(:zipcode).filled(:string)
+    required(:address).description("The shipping address").hash do
+      required(:street).filled(:string).description("Street address")
+      optional(:city).filled(:string).description("City name")
+      optional(:zipcode).maybe(:string).description("Postal code")
     end
   end
 
@@ -119,7 +119,7 @@ Control which tools and resources are available based on request context:
 class AdminTool < FastMcp::Tool
   tags :admin, :dangerous
   description "Perform admin operations"
-  
+
   def call
     # Admin only functionality
   end
@@ -128,7 +128,7 @@ end
 # Filter tools based on user permissions
 server.filter_tools do |request, tools|
   user_role = request.params['role']
-  
+
   case user_role
   when 'admin'
     tools # Admins see all tools
@@ -141,6 +141,7 @@ end
 ```
 
 ### 🚂 Fast Ruby on Rails implementation
+
 ```shell
 bundle add fast-mcp
 bin/rails generate fast_mcp:install
@@ -178,7 +179,9 @@ FastMcp.mount_in_rails(
   end
 end
 ```
+
 The install script will also:
+
 - add app/resources folder
 - add app/tools folder
 - add app/tools/sample_tool.rb
@@ -230,6 +233,7 @@ end
 ```
 
 ### Easy Sinatra setup
+
 I'll let you check out the dedicated [sinatra integration docs](./docs/sinatra_integration.md).
 
 ## 🚀 Quick Start
@@ -292,17 +296,21 @@ Clone this project, then give it a go !
 ```shell
 npx @modelcontextprotocol/inspector examples/server_with_stdio_transport.rb
 ```
+
 Or to test with an SSE transport using a rack middleware:
+
 ```shell
 npx @modelcontextprotocol/inspector examples/rack_middleware.rb
 ```
 
 Or to test over SSE with an authenticated rack middleware:
+
 ```shell
 npx @modelcontextprotocol/inspector examples/authenticated_rack_middleware.rb
 ```
 
 You can test your custom implementation with the official MCP inspector by using:
+
 ```shell
 # Test with a stdio transport:
 npx @modelcontextprotocol/inspector path/to/your_ruby_file.rb
@@ -331,6 +339,7 @@ end
 ### Integrating with Claude Desktop
 
 Add your server to your Claude Desktop configuration at:
+
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
@@ -339,28 +348,27 @@ Add your server to your Claude Desktop configuration at:
   "mcpServers": {
     "my-great-server": {
       "command": "ruby",
-      "args": [
-        "/Users/path/to/your/awesome/fast-mcp/server.rb"
-      ]
+      "args": ["/Users/path/to/your/awesome/fast-mcp/server.rb"]
     }
   }
 }
 ```
 
 ## How to add a MCP server to Claude, Cursor, or other MCP clients?
+
 Please refer to [configuring_mcp_clients](docs/configuring_mcp_clients.md)
 
 ## 📊 Supported Specifications
 
-| Feature | Status |
-|---------|--------|
-| ✅ **JSON-RPC 2.0** | Full implementation for communication |
-| ✅ **Tool Definition & Calling** | Define and call tools with rich argument types |
-| ✅ **Resource & Resource Templates Management** | Create, read, update, and subscribe to resources |
-| ✅ **Transport Options** | STDIO, HTTP, and SSE for flexible integration |
-| ✅ **Framework Integration** | Rails, Sinatra, Hanami, and any Rack-compatible framework |
-| ✅ **Authentication** | Secure your AI endpoints with token authentication |
-| ✅ **Schema Support** | Full JSON Schema for tool arguments with validation |
+| Feature                                         | Status                                                    |
+| ----------------------------------------------- | --------------------------------------------------------- |
+| ✅ **JSON-RPC 2.0**                             | Full implementation for communication                     |
+| ✅ **Tool Definition & Calling**                | Define and call tools with rich argument types            |
+| ✅ **Resource & Resource Templates Management** | Create, read, update, and subscribe to resources          |
+| ✅ **Transport Options**                        | STDIO, HTTP, and SSE for flexible integration             |
+| ✅ **Framework Integration**                    | Rails, Sinatra, Hanami, and any Rack-compatible framework |
+| ✅ **Authentication**                           | Secure your AI endpoints with token authentication        |
+| ✅ **Schema Support**                           | Full JSON Schema for tool arguments with validation       |
 
 ## 🗺️ Use Cases
 
@@ -497,6 +505,7 @@ FastMcp.mount_in_rails(
 Check out the [examples directory](examples) for more detailed examples:
 
 - **🔨 Basic Examples**:
+
   - [Simple Server](examples/server_with_stdio_transport.rb)
   - [Tool Examples](examples/tool_examples.rb)
 
